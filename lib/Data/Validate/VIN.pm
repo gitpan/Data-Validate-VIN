@@ -3,9 +3,9 @@ package Data::Validate::VIN;
 use 5.008;
 use strict;
 use warnings;
-use Carp;
+#use Carp;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub new {
     my ( $class, $vin ) = @_;
@@ -133,23 +133,21 @@ sub _checkCharacters {
 
     # wanted unwanted toCheck section
 
-    my $checked = $args{toCheck};
-    $checked =~ tr/[a-z]/[A-Z]/;
+    my $checked = uc($args{toCheck});
+    my @checked = split(q{}, $checked); ## char array
+    my @illegal;
 
-    if ( $checked !~ /^$args{wanted}+$/ ) {
-        my $tmp = $checked;
-
-        my $badChars;
-
-        until ( $tmp =~ /^$args{wanted}+$/ or $tmp =~ /^$/ ) {
-            my ($bad) = $tmp =~ /($args{unwanted})/;
-            $tmp =~ s/($args{unwanted})//;
-
-            $badChars .= $bad;
+    for (my $i = 0; $i < @checked; $i++) {
+        unless ($checked[$i] =~ /^$args{wanted}+$/) {
+            push @illegal, $checked[$i];
         }
-        my $err = "Illegal characters in " . $args{section} . ": $badChars";
+    }
+
+    if (@illegal) {
+        my $err = "Illegal characters in " . $args{section} . ': ' . join(q{}, @illegal);
         $self->_trackError($err);
     }
+
     return $checked;
 }
 
@@ -467,7 +465,7 @@ North American Vehicle Identification Numbers from 1980 and later
 
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 SYNOPSIS
 
@@ -571,8 +569,10 @@ collin seaton, C<< <cseaton at cpan.org> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-data-validate-vin at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Validate-VIN>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Data-Validate-VIN>.
+I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
+
+Fork me on Github: L<https://github.com/chilledham/Data-Validate-VIN>
 
 =head1 SUPPORT
 
@@ -602,6 +602,12 @@ L<http://cpanratings.perl.org/d/Data-Validate-VIN>
 L<http://search.cpan.org/dist/Data-Validate-VIN/>
 
 =back
+
+=head1 THANKS
+
+Thanks to the following contributors:
+
+moltar
 
 =head1 WARRANTY
 
